@@ -1,6 +1,6 @@
 #include <hal/multiboot.h>
 #include <drivers/Ecran.h>
-// #include <Applications/Fax/Fax.h>
+#include <Applications/Fax/Fax.h>
 // #include <Applications/SuperPong/Grille.h>
 // #include <drivers/PortSerie.h>
 
@@ -8,7 +8,7 @@
 extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 	char beuf[250];
 	Ecran ecran;
-//	Fax fax; // A d�commenter pourla question 3
+	Fax fax; // A d�commenter pourla question 3
 //	PortSerie ps; // A d�commenter pour la question 4
 //	Grille grille(&ecran); // A decommenter pour la question 5
 
@@ -41,7 +41,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 
 	// Question 3 : puis decodez le message du Fax
 
-//	fax.afficheImage(&ecran);
+	fax.afficheImage(&ecran);
 
 
 	// Question 4 : affichage sur port serie

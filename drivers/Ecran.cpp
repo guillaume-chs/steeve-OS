@@ -202,23 +202,21 @@ void Ecran::afficherCurseur(){
 
 void Ecran::defilement(int nline) {
 	int line, col;
-    unsigned char attribut = coderAttribut(arrierePlan, arrierePlan);
 
     for (line = nline; line < LIGNES; line++) {
         for (col = 0; col < COLONNES; col++) {
             int posOrig = (line-nline) * COLONNES + col;
             int posCurr = line * COLONNES + col;
-
             origine[posOrig].caractere = origine[posCurr].caractere;
             origine[posOrig].couleurs = origine[posCurr].couleurs;
         }
     }
 
 
+    unsigned char attribut = coderAttribut(arrierePlan, arrierePlan);
     for (line = LIGNES - nline - 1; line < LIGNES; line++) {
         for (col = 0; col < COLONNES; col++) {
             int pos = line * COLONNES + col;
-
             origine[pos].caractere = ' ';
             origine[pos].couleurs = attribut;
         }

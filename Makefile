@@ -37,9 +37,9 @@ KERNEL_OBJ   = sextant.elf
 # Main target
 all: $(KERNEL_OBJ)
 
-$(KERNEL_OBJ): multiboot.o main.o Ecran.o
+$(KERNEL_OBJ): multiboot.o main.o Ecran.o Fax.o
 	echo 'Votre compilateur $(COMPILATEUR) et votre lieur $(LIEUR)'
-	$($(LIEUR)) $(LDFLAGS) -T ./support/sextant.lds -o build/boot/$@ build/all-o/main.o build/all-o/multiboot.o build/all-o/Ecran.o
+	$($(LIEUR)) $(LDFLAGS) -T ./support/sextant.lds -o build/boot/$@ build/all-o/main.o build/all-o/multiboot.o build/all-o/Ecran.o build/all-o/Fax.o
 
 multiboot.o: hal/multiboot.S
 	$($(COMPILATEUR)) -I.  -c hal/multiboot.S $(CPPFLAGS) -DASM_SOURCE=1 -o build/all-o/multiboot.o
@@ -49,6 +49,9 @@ main.o: sextant/main.cpp
 
 Ecran.o : drivers/Ecran.cpp
 	$($(COMPILATEUR)) -I.  -c drivers/Ecran.cpp $(CPPFLAGS) -o build/all-o/Ecran.o
+
+Fax.o : Applications/Fax/Fax.cpp
+	$($(COMPILATEUR)) -I.  -c Applications/Fax/Fax.cpp $(CPPFLAGS) -o build/all-o/Fax.o
 
 # Clean directory
 clean:
