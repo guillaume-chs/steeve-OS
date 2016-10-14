@@ -205,7 +205,6 @@ void Ecran::defilement(int nline) {
     unsigned char attribut = coderAttribut(arrierePlan, arrierePlan);
 
     for (line = nline; line < LIGNES; line++) {
-
         for (col = 0; col < COLONNES; col++) {
             int posOrig = (line-nline) * COLONNES + col;
             int posCurr = line * COLONNES + col;
@@ -217,7 +216,6 @@ void Ecran::defilement(int nline) {
 
 
     for (line = LIGNES - nline - 1; line < LIGNES; line++) {
-
         for (col = 0; col < COLONNES; col++) {
             int pos = line * COLONNES + col;
 
