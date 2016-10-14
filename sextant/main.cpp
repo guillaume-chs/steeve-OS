@@ -34,7 +34,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 
 	// Question 3 : G�rer le d�filement de l'ecran en vous aidant de
     ecran.afficherMot("tra\nlala1\nlala2\nlala3\nlala4\nlala5\nlala6\nlala7\nlala8\nlala9\nlala10\nlala11\nlala12\nlala13\nlala14\nlala15\nlala16\nlala17\nlala18\nlala19\nlala20\nlala21\nlala22\nlala23\nlala24\nlala25\nlala26\nlala27\nlala28\nlala29\nlala30\n");
-    ecran.defilement(10);
+    //ecran.defilement(1);
 
 	// Question 3 : puis decodez le message du Fax
 
