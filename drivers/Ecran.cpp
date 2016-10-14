@@ -214,7 +214,7 @@ void Ecran::defilement(int nline) {
 
 
     unsigned char attribut = coderAttribut(arrierePlan, arrierePlan);
-    for (line = LIGNES - nline - 1; line < LIGNES; line++) {
+    for (line = LIGNES - nline; line < LIGNES; line++) {
         for (col = 0; col < COLONNES; col++) {
             int pos = line * COLONNES + col;
             origine[pos].caractere = ' ';
