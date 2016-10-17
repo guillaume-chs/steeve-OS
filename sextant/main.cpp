@@ -10,7 +10,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 	Ecran ecran;
 	Fax fax; // A d�commenter pourla question 3
 	PortSerie ps; // A d�commenter pour la question 4
-	// Grille grille(&ecran); // A decommenter pour la question 5
+	Grille grille(&ecran); // A decommenter pour la question 5
 
 	/** Test de l'affichage **/
 	/*** Affichage de chaines testant la prise en compte du défilement et '\n' ***/
@@ -56,7 +56,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 
 	// Question 5 : la Grille du Jeu
 
-	// grille.affiche();
+	grille.affiche();
 
 	// BONUS
 	ecran.afficherChiffre(160);

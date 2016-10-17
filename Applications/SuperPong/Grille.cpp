@@ -12,12 +12,12 @@ Grille::Grille(Ecran* e){
 				tab[x][y].setCaseBord();
 			if(y==0)
 				if(x > HAUTEUR/3 && x< HAUTEUR*2/3)
-					tab[x][y].setCaseTrou();//Installation du trou à gauche
+					tab[x][y].setCaseTrou();//Installation du trou ï¿½ gauche
 				else
 					tab[x][y].setCaseBord();
 			if(y==(LARGEUR-1))
 				if(x > HAUTEUR/3 && x< HAUTEUR*2/3)
-					tab[x][y].setCaseTrou();//Installation du trou à droite
+					tab[x][y].setCaseTrou();//Installation du trou ï¿½ droite
 				else
 					tab[x][y].setCaseBord();
 
@@ -28,5 +28,9 @@ Grille::Grille(Ecran* e){
 
 
 void Grille::affiche(){
-// A FAIRE POUR LA PROCHAINE FOIS
+	for(int x=0 ; x<HAUTEUR ; x++) {
+		for(int y=0 ; y<LARGEUR ; y++) {
+		    tab[x][y].paint();
+		}
+	}
 };
