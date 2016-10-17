@@ -7,13 +7,13 @@
  */
 
 
-#include <hal/fonctionsES.h>
+#include "hal/fonctionsES.h"
 #define SERIAL_PORT 0x3F8
 
 class PortSerie {
 public:
-    void ecrireMot(const char *mot);
+    void ecrireMot(char const *mot);
 
-}
+};
 
 #endif

@@ -1,6 +1,6 @@
 #include "PortSerie.h"
 
-PortSerie::ecrireMot(const char *mot) {
+void PortSerie::ecrireMot(char const *mot) {
 	int i=0;
 
 	while(mot[i]!='\0'){ // '\0' : caract�re de fin

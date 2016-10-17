@@ -17,8 +17,8 @@
 #define CLIGN_OUI		1 // Clignotement
 #define CLIGN_NON		0 // Clignotement
 
-#include <sextant/types.h>
-#include <hal/fonctionsES.h>
+#include "sextant/types.h"
+#include "hal/fonctionsES.h"
 
 /**
  * @struct caseEcran

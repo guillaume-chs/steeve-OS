@@ -1,14 +1,14 @@
 /*
  * Fax.h
  *
- *  Created on: 4 août 2008
+ *  Created on: 4 aoï¿½t 2008
  *      Author: jmenaud
  */
 
 #ifndef FAX_H_
 #define FAX_H_
 
-#include <drivers/Ecran.h>
+#include "drivers/Ecran.h"
 
 class Fax {
 public :

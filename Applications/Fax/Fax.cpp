@@ -1,7 +1,7 @@
 /*
  * Fax.cpp
  *
- *  Created on: 4 août 2008
+ *  Created on: 4 aoï¿½t 2008
  *      Author: jmenaud
  */
 
@@ -13,7 +13,7 @@
 //JMMM
 
 /*
-	Décompress une chaine condee en RLE
+	Dï¿½compress une chaine condee en RLE
 */
 int Fax::RLEUncompress(unsigned char *output, unsigned char *input)
 {
@@ -52,9 +52,8 @@ int Fax::RLEUncompress(unsigned char *output, unsigned char *input)
 
 void Fax::afficheImage(Ecran* e)
 {
-	int i, j;
 	char temp[10000];
-	j = RLEUncompress((unsigned char *)temp, msg);
+	RLEUncompress((unsigned char *)temp, msg);
 	e->afficherMot(temp,BLANC);
 
 }
