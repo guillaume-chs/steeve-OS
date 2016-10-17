@@ -1,16 +1,16 @@
 #include <hal/multiboot.h>
 #include <drivers/Ecran.h>
 #include <Applications/Fax/Fax.h>
-// #include <Applications/SuperPong/Grille.h>
-// #include <drivers/PortSerie.h>
+#include <drivers/PortSerie.h>
+#include <Applications/SuperPong/Grille.h>
 
 
 extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 	char beuf[250];
 	Ecran ecran;
 	Fax fax; // A d�commenter pourla question 3
-//	PortSerie ps; // A d�commenter pour la question 4
-//	Grille grille(&ecran); // A decommenter pour la question 5
+	PortSerie ps; // A d�commenter pour la question 4
+	// Grille grille(&ecran); // A decommenter pour la question 5
 
 	/** Test de l'affichage **/
 	/*** Affichage de chaines testant la prise en compte du défilement et '\n' ***/
@@ -46,7 +46,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 
 	// Question 4 : affichage sur port serie
 
-//	ps.ecrireMot("testtest");
+	ps.ecrireMot("testtest");
 //	ps.ecrireMot("tra\nlala1\nlala2\nlala3\nlala4\nlala5\nlala6\nlala7\nlala8\nlala9\nlala10\nlala11\nlala12\nlala13\nlala14\nlala15\nlala16\nlala17\nlala18\nlala19\nlala20\nlala21\nlala22\nlala23\nlala24\nlala25\nlala26\nlala27\nlala28\nlala29\nlala30\n");
 //	ps.ecrireMot("testtest");
 //	ps.ecrireMot("testtest");
@@ -56,7 +56,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 
 	// Question 5 : la Grille du Jeu
 
-//	grille.affiche();
+	// grille.affiche();
 
 	// BONUS
 	ecran.afficherChiffre(160);
