@@ -21,10 +21,10 @@ void func2(int c,int d, Ecran *ec) {
 
 	ec->sautDeLigne();
 	ec->afficherMot("Adresse de c : ",BLANC);
-	ec->afficherBase((unsigned int) 0 ,16,BLANC);
+	ec->afficherBase((unsigned int) &c ,16,BLANC);
 	ec->sautDeLigne();
 	ec->afficherMot("Adresse de d : ",BLANC);
-	ec->afficherBase((unsigned int)0 ,16,BLANC);
+	ec->afficherBase((unsigned int)&d ,16,BLANC);
 	ec->sautDeLigne();
 
 	/* FIN QUESTION 1 */
@@ -39,10 +39,10 @@ void func(int a,int b, Ecran *ec) {
 
 	ec->sautDeLigne();
 	ec->afficherMot("Adresse de a : ",BLANC);
-	ec->afficherBase((unsigned int)0,16,BLANC);
+	ec->afficherBase((unsigned int)&a,16,BLANC);
 	ec->sautDeLigne();
 	ec->afficherMot("Adresse de b : ",BLANC);
-	ec->afficherBase((unsigned int)0,16,BLANC);
+	ec->afficherBase((unsigned int)&b,16,BLANC);
 	ec->sautDeLigne();
 
 	/* FIN QUESTION 1 */
@@ -83,29 +83,31 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 	SuperPong *test;
 	PortSerie ps;
 	Timer timer;
-//	Grille grille(&ecran);
+	Grille grille(&ecran);
 	Horloge h(&ecran,&timer);
 	Clavier clavier;
 	SuperPong jeux;
-
 
 	ecran.effacerEcran(NOIR);
 
 	idt_setup();
 	irq_setup();
+
 	//Initialisation de la fréquence de l'horloge
 	timer.i8254_set_frequency(1000);
 
 	irq_set_routine(IRQ_TIMER, ticTac);
 	asm volatile("sti\n");//Autorise les interruptions
 
-	i8259_disable_irq_line(IRQ_KEYBOARD);
+	//i8259_disable_irq_line(IRQ_KEYBOARD);
+	irq_set_routine(IRQ_KEYBOARD, handler_clavier);
 
 	jeux.init(&ecran,&clavier);
 
-	while(true) {h.afficheHeure();
-					if (clavier.testChar()) jeux.start();
-				}
+	/*while(true) {
+		h.afficheHeure();
+		if (clavier.testChar()) jeux.start();
+	}*/
 
 
 

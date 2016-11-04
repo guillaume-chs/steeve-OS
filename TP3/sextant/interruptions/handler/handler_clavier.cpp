@@ -17,8 +17,8 @@ bool modifBuf=false;
 
 static void reboot()
 {
-// A COMPLETER
-	}
+	ecrireOctet(0xfe,0x64);
+}
 
 int writechar(int sc) {
 	int ch = 0;
