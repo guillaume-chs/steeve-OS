@@ -1,0 +1,8 @@
+bug 1 :
+le son se lance bien
+par contre on arrive pas à l'arreter. Normalement le son s'arrete si on appui sur une autre touche que celle enregistre dans le fichier Son.cpp : test fonctionne bien sous linux et Mac, mais aléatoirement sous windows ....
+
+bug 3 :
+la question sur les led ne fonctionne pas
+
+

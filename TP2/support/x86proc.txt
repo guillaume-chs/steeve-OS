@@ -1,0 +1,561 @@
+Adressage mode reel
+===================
+
+Memoire adressable 
+------------------
+  +-----+ FFFFF (1 Mo)
+  |     |
+  |     |
+  |     |
+  |     |
+  |     |   +-----+ FFFF (64 ko)
+  |     |   |     |
+  |     |   | I/O |
+  |     |   |     |
+  |     |   |     |
+  +-----+ 0 +-----+ 0
+
+L'octet de plus faible poids est dans l'adresse la plus basse => inversion 
+apparente.
+
+Ports d'entree/sortie
+---------------------
+000-01F		Controleur DMA, 8237A-5
+020-03F		Controleur 8259A, maitre
+040-05F		Timer, 8254-2
+060-06F		8042 clavier
+070-07F		Horloge temps reel, masque NMI
+0A0-0BF		Controleur 8259A, esclave
+0C0-0DF		Controleur 2 DMA, 8237A-5
+1F0-1F8		Disque
+278-27F		Port parrallele 2
+2B0-2DF		Autre carte EGA
+2F8-2FF		Port serie 2
+378-37F		Port parrallele 1
+3B0-3BF		Carte ecran monochrome
+3C0-3CF		Carte EGA
+3D0-3DF		Carte couleur
+3F0-3F7		Controleur unite de disquettes
+3F8-3FF		Port serie 1
+
+
+Interruptions
+=============
+0-31	Exceptions et interruptions reservees
+32+		Interruptions de l'utilisateur
+
+
+Le controleur programmable d'interruptions PIC 8259
+===================================================
+. Le registre ISR marque les interruptions en service en mettant le bit
+correspondant a 1.
+. Le registre IMR masque les interruptions en mettant le bit a 1.
+
+Traitement d'une interruption
+-----------------------------
+1/ Un peripherique demande une interruption en mettant la ligne IRn a l'etat 
+haut.
+2/ Le registre IRR sert a indiquer les interruptions en attente de traitement.
+Le 8259 evalue celle de plus haute priorite.
+3/ Le 8259 indique au processeur la demande d'interruption en activant 
+la ligne INT (connectee a INTR du processeur).
+4/ Le processeur finit l'instruction en cours, sauvegarde CS et IP, masque
+les interruptions avec IF, etc. puis emet un signal INTA (acquisition 
+d'interruption).
+5/ Le 8259 recoit INTA et met a jour les registres ISR (bit mis a 1) et IRR
+(bit mis a 0). Le bit de ISR est a 1 tant que le PIC ne recoit pas un
+signal de fin d'interruption, EOI (end of interrupt).
+6/ Le processeur emet un second INTA.
+7/ Le 8259 emet sur le bus de donnees un mot de 8 bits, le vecteur
+d'interruption.
+
+Le vecteur d'interruption
+-----------------------------
+Comme il n'y a que 8 interruptions possible par PIC, seuls les 3 bits
+de poids faible comptent dans le vecteur pour determiner l'interruption.
+Les 5 autres bits, de poids fort, serviront a calculer l'adresse du
+vecteur.
+Si une interruption est en service, les interruptions de priorite
+inferieure ou egale sont interdites. Pour les autres, le PIC alerte
+le microprocesseur qui l'acceptera ou non en fonction de son programme.
+
+Les EOI
+-----------------------------
+Il y a 3 type de EOI :
+- mode automatique
+	Provoque pendant le front descendant du 2eme INTA. Les dangers sont
+	que l'interruption pourra s'interrompre elle-meme et qu'aucune trace
+	n'est gardee des interruptions en cours.
+- EOI non specifique
+	Emis a la fin du traitement de l'interruption. A sa reception, le bit
+	le plus prioritaire de ISR est mis a zero. Le danger est que ca n'est 
+	pas la bonne interruption !
+- EOI specifique
+	Mise a zero du bit correct.
+
+Rotation des priorites 
+......................
+- rotation automatique
+- rotation specifique
+Elles permettent de bouleverser l'ordre des priorites.
+
+Programmation
+-----------------------------
+* ICW = mots d'initialisation (ICW1 a ICW4) qui precedent tout usage
+du PIC.
+* OCW = mots de commande
+
+Initialisation
+..............
+Le microprocesseur emet une sequence de 4 mots, de ICW1 a ICW4.
+Seuls les 2 premiers sont obligatoires.
+
+ICW1	PIC seul ? Utilisation de ICW4 ?
+ICW2	Quels vecteurs ?
+ICW3	Ou sont les maitres et les esclaves ?
+ICW4	Quels microprocesseur ? Quel EOI ? Maitre ou esclave ?
+
+ICW1
+....
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 0| | 0| 0| 0| 1| A| 0| B| C|
+   +--+ +--+--+--+--+--+--+--+--+
+     ^             ^
+debut de           | 
+sequence ----------+  
+A = declenchement par niveau (1) ou par front (0)
+B = seul (1) ou cascade (0)
+C = avec ICW4 (1) ou sans (0)
+
+ICW2
+....
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 1| |              | 0| 0| 0|
+   +--+ +--+--+--+--+--+--+--+--+
+     ^           ^
+obligatoire      |
+                 |
+       valeurs du vecteur
+Par exemple, si la valeur de ICW2 est 00001000, les pointeurs
+d'interruption iront de 0x08 a 0x0F.
+
+ICW3
+....
+Pour le maitre :
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 1| |                       |
+   +--+ +--+--+--+--+--+--+--+--+
+                    ^
+       entree esclave (1) ou non (0)
+
+Pour l'esclave :
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 1| |   inutilise  |        |
+   +--+ +--+--+--+--+--+--+--+--+
+                            ^
+       entree maitre (1) ou non (0)
+
+Par exemple, si la valeur de ICW3 est 00000100, l'esclave est relie
+a l'entree D2 du maitre.
+
+ICW4
+....
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 1| | inut.  | A| B| C| D| E|
+   +--+ +--+--+--+--+--+--+--+--+
+
+A = interruption emboitables complet (1) ou partiel (0)
+B = commande un transmetteur (1) ou mode maitre/esclave (0)
+C = maitre (1) ou esclave (0)
+D = EOI automatique (1) ou normale (0)
+E = famille x86 (1) ou 8080/8085 (0)
+
+Par exemple, la valeur 00000001 specifie que l'on est en mode x86 (bit E),
+que l'on veut un EOI normal (bit D).
+Le bit (C) n'est pas pris en compte car Le bit (B) a 0 signifie l'on est en 
+mode maitre/esclave.
+
+OCW1
+....
+Masque des interruptions
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 1| | masque d'interrupt.   |
+   +--+ +--+--+--+--+--+--+--+--+
+Masque d'interruption etabli => bit a 1
+Pas de masque => bit a 0
+
+OCW2
+....
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 0| |   EOI  |0 |0 |x |y |z |
+   +--+ +--+--+--+--+--+--+--+--+
+
+EOI :
+     |  0  0  1 | EOI non specifique
+     |  0  1  1 | EOI specifique
+     |  1  0  1 | Rotation sur EOI non specifique
+     |  1  0  0 | Rotation sur EOI automatique
+     |  0  0  0 | Rotation sur EOI automatique
+     |  1  1  1 | Rotation sur EOI specifique
+     |  1  1  0 | Etablissement de code prioritaire
+     |  0  1  0 | Pas d'operation
+
+x, y et z = niveau d'interruption code de 0 a 7 en binaire.
+
+OCW3
+....
+    A0   D7                   D0
+   +--+ +--+--+--+--+--+--+--+--+
+   | 0| |? | Spe |0 |1 |B |  C  |
+   +--+ +--+--+--+--+--+--+--+--+
+
+Spe =|  0  0  | Pas d'operation
+     |  0  1  | Pas d'operation
+     |  1  0  | Reset
+     |  1  1  | Set
+Spe Etabli le mode de masquage special.
+
+B = etabli l'acquisition d'interruptions par polling.
+
+C =  |  0  0  | Pas de lecture
+     |  0  1  | Pas de lecture
+     |  1  0  | Lecture IRR
+     |  1  1  | Lecture ISR
+
+Programmation pratique
+----------------------
+Cette sequence initialise le maitre puis l'esclave :
+
+ ; Maitre
+ mov al,11h ; Initialisation de ICW1
+ out 20h,al
+ jmp $+2    ; temps d'attente
+
+ mov al,08h ; Initialisation de ICW2
+ out 21h,al
+ jmp $+2    
+
+ mov al,04h ; Initialisation de ICW3
+ out 21h,al
+ jmp $+2  
+
+ mov al,01h ; Initialisation de ICW4
+ out 21h,al
+ jmp $+2   
+
+ mov al,0FFh ; demasquage des interruptions
+ out 21h,al
+ 
+ ; Esclave
+ mov al,11h ; Initialisation de ICW1
+ out A0h,al
+ jmp $+2    ; temps d'attente
+
+ mov al,70h ; Initialisation de ICW2
+ out A1h,al
+ jmp $+2    
+
+ mov al,02h ; Initialisation de ICW3
+ out A1h,al
+ jmp $+2    
+
+ mov al,01h ; Initialisation de ICW4
+ out A1h,al
+ jmp $+2   
+
+ mov al,0FFh ; demasquage des interruptions
+ out A1h,al
+ 
+
+Le MC6845, controleur d'ecran
+==============================
+C'est un circuit d'interface entre le processeur et l'ecran.
+Des broches adressent la RAM de rafraichissement et d'autres le
+generateur de caracteres (en ROM).
+
+* La programmation du 6845 passe par 17 registres. Sauf exception,
+ces registres sont en ecriture seulement :
+. R0 = Definit le temps en nombre de caracteres.
+     Temps d'une ligne = temps pour afficher ses caracteres + temps
+     de retour - 1
+. R1 = Nombre de caracteres par ligne. R1<R0.
+. R2 = Pilote la synchronisation horizontale. Il faut deux choses :
+       1/ R2>R1 
+       2/ R2+R3<R0   :-(
+       Si on accroit R2, on decale l'image a gauche.
+       Si on decroit R2, on decale l'image a droite.
+. R3 = Duree de l'impulsion de synchronisation HS et du balayage
+horizontal.
+. R4 = Sur 7 bits, temps de balayage vertical en nombre de lignes - 1.
+. R5 = Sur 5 bits, ajuste R4.
+. R6 = Sur 7 bits, nombre de lignes affichees.
+. R7 = Sur 7 bits, pilote la synchronisation verticale. Il est 
+programme en temps de rangees de caracteres.
+       Si on accroit R7, on decale l'image vers le haut.
+       Si on decroit R7, on decale l'image vers le bas.
+. R8 = Sur 2 bits, interlacage. Le mode est entrelace (01 et 11) ou
+non interlace (00 et 10). Le mode de l'IBM-AT est 10.
+. R9 = Sur 5 bits, nombre maximal de lignes par caractere - 1.
+. R10 (7 bits) et R11 (5 bits) = specifient le type de curseur.
+
+            Registre R10
+    +--+--+--+--+--+--+--+--+
+    | type|     position    |
+    +--+--+--+--+--+--+--+--+
+type = | 0 0 | fixe
+       | 0 1 | non affiche
+       | 1 0 | clignotant a 1/16
+       | 1 1 | clignotant a 1/32
+position = position de la ligne de depart (c.a.d par rapport au haut).
+
+R11 contient la ligne d'arrivee.
+
+Exemple :    0 . . . . . . . 
+             1 . . . . . . . 
+             2 . . . . . . . 
+             3 . . . . . . . 
+             4 * * * * * * * 
+             5 * * * * * * * 
+             6 * * * * * * * 
+             7 . . . . . . . 
+             8 . . . . . . . 
+
+. R12 (6 bits) et R13 (8 bits) = adresse en RAM de la position superieure
+gauche de l'ecran. R12 code l'octet de poids fort et R13 celui de poids 
+faible. L'adresse est codee sur 14 bits !
+. R14 (6 bits) et R15 (8 bits) = adresse en RAM de la position du curseur.
+R14 code l'octet de poids fort et R15 celui de poids faible. En ecriture
+_et_ lecture !
+. R16 (6 bits) et R17 (8 bits) = adresse du crayon lumineux. En ecriture
+_et_ lecture !
+
+* AR = registre d'adresse de 5 bits qui permet d'adresser l'un des registres
+precedents.
+
+* CS et RS = servent egalement a l'adressages des registres R0 a R17 mais 
+aussi a celui de AR ! 
+Si CS = 1, aucun registre n'est adresse.
+Si CS = RS = 0 , AR est adresse.
+Si CS = 0 et RS = 1, AR indique en binaire quel registre est adresse. 
+Par exemple, 00110 pour R6 et 01001 pour R9.
+
+Attributs des caracteres
+------------------------
+    +--+--+--+--+--+--+--+--+
+    |cl| arriere|i | avant  |
+    +--+--+--+--+--+--+--+--+
+cl = clignotement (1) ou non (0).
+arriere = codage couleur du fond.
+i = sur-intensite (1) ou normal (0).
+avant = codage couleur des caracteres.
+
+Attention, si avant=001 et arriere=000, cela signifie le soulignement !
+
+Programmation monochrome
+------------------------
+Affichage 25 x 80 caracteres, matrice 9 x 14 (soient 350 lignes et 
+720 colonnes).
+Chaque caractere occupe reellement 7 x 9 points.
+Frequence horizontale = 18432 Hz.
+Bande passante du moniteur = 16,27 MHz.
+Rafraichissemnt = 50 Hz.
+
+R0=0x61     R1=0x50     R2=0x52     R3=0x0F     R4=0x19     R5=0x06
+R6=0x19     R7=0x19     R8=0x02     R9=0x0D     R10=0x0B    R11=0x0C
+R12=0x00    R13=0x00    R14=0x00    R15=0x00
+
+Le buffer demarre en 0xB000 et va jusqu'a 0xB0FFF, soient 4 ko.
+
+Adresse :
+     3B4     registre d'index du 6845
+     3B5     registre de donnees du 6845
+     3B8     port de commande 1
+     3BA     etat de l'ecran
+     3BC     port parrallele de donnees
+
+On commence part emettre 0x01 sur le port de commande 1 pour mettre
+l'affichage en haute resolution.
+
+Programmation couleur
+---------------------
+Matrice de 8x8 et caracteres de 5x7. Il y a 16 ko de memoire, soient 
+4 pages d'ecran (2k pour les attributs et 2k pour les caracteres).
+Il n'y a plus de mode souligne !
+
+Couleurs
+........
+000 noir
+001 bleu
+010 vert
+011 cyan
+100 rouge
+101 magenta
+110 jaune-brun
+111 blanc
+
+Le bit d'intensite n'est plus utilise en tant que tel. Il augmente
+le nombre de couleurs disponibles pour l'avant-plan en eclaircissant
+les couleurs => bleu clair, vert clair, etc.
+
+Utilisation de la memoire
+.........................
+     BBF40-BBFFF inutilise (192 octets)
+     BA000-BBF3F adresses impaires (8 ko)
+     B9F40-B9FFF inutilise (192 octets)
+     B8000-B9F3F adresses paires (8 ko)
+  +----------+ 
+  | inutilise| BBFFF 
+  +----------+ BBF40
+  |          | BBF3F
+  |          | 
+  +----------+ BA000
+  | inutilise| B9FFF
+  +----------+ B9F40
+  |          | B9F3F
+  |          |
+  +----------+ B8000
+
+R0=0x71     R1=0x50     R2=0x5A     R3=0x0A     R4=0x1F     R5=0x06
+R6=0x19     R7=0x1C     R8=0x02      R9=0x07     R10=0x06    R11=0x07
+R12=0x00    R13=0x00    
+
+Adresse :
+     3D4     registre d'index du 6845
+     3D5     registre de donnees du 6845
+     3D8     registre de commande video
+     3D9     registre de selection couleur
+     3DA     etat de l'ecran
+     3DB     RAZ bascule photostyle
+     3DC     etablissement bascule photostyle
+
+
+Le 8042, controleur du clavier
+==============================
+Le clavier est gere par le 8042, place sur la carte mere. Le clavier
+lui-meme contient un 2nd microprocesseur, le 6805. Les deux echangent
+des informations. 
+Le 8042 scan continuellement le clavier.
+Le clavier envoie un scan-code au PC (down-code ou up-code).
+Sur le PC, le 6805 recoit les scan-codes, 
+les converti, les rend lisibles sur le port 0x60 et interrompt
+le processeur.  
+Le codage des touches des clavies n'est pas present dans cette documentation.
+Le 8042 recoit les donnees du clavier en serie, teste leur parite, traduit 
+les codes et les stocke, sous forme d'octets, dans un buffer de sortie 
+pour les presenter ensuite au systeme.
+Chaque octet est envoye par le clavier au controleur quand celui-ci 
+indique que son buffer d'entree est pret.
+Chaque octet de donnee est accompagne d'un bit start, d'un bit de parite
+et d'un bit stop.
+La communication avec le 6805 se fait par le port 0x64. Sa lecture donne
+le statut du microcontroleur et y ecrire lui envoie une commande.
+Quand le bit_1 = 1 (input buffer full), des donnees sont lisibles en 0x60.
+Les donnees ecrites en 0x60 sont envoyees au clavier et celles ecrites
+en 0x64 sont envoyees au 6805.
+Les donnees lues en 0x60 proviennent generalement du clavier.
+
+Registre d'etats du 6805 (port 0x64):
+    +--+--+--+--+--+--+--+--+
+    |p |r |e |i |f1|f0|ib|ob|
+    +--+--+--+--+--+--+--+--+
+p = parite paire (1, equivaut a une erreur) ou impaire (0).
+r = temps de reception depasse (1) ou ok (0).
+e = temps d'emission depasse (1) ou ok (0).
+i = clavier inhibe (0) ou non (1).
+f1= adresse 0x60 (0, donne transmise) ou 0x64 (1, commande fournie).
+    Les donnees en 0x60 sont accessibles en lecture. La lecture d'un 
+    tel octet positionne le bit 'ob' a 0 (vidage du buffer).
+f0= (0) pendant un reset et (1) apres un test reussi.
+ib= buffer d'entree plein (1) ou vide (0). Il est accessibles en
+    ecriture et dispose de deux ports. Il recoit les donnees en 0x60
+    et les commandes en 0x64.
+ob= buffer de sortie plein (1) ou vide (0). Son adresse est 0x60 et ses
+    donnees sont accessibles en lecture.
+
+Octet de commande du 6845 :
+---------------------------
+    +--+--+--+--+--+--+--+--+
+    |0 |f |e |d |c |b |a'|a |
+    +--+--+--+--+--+--+--+--+
+f = les codes claviers sont convertis (1) ou non (0).
+e = interface PC (1) ou AT (0).
+d = interface inhibee (1) ou non (0).
+c = le bit 'd' intervient (0) ou non (1).
+b = ce bit va dans le bit 2 du registre d'etats.
+a'= interruptions souris activees (1) ou inhibees (0).
+a = demande d'interruption emise par le controleur (1) ou non (0).
+
+Commandes en 0X64 (pour le 6845)
+--------------------------------
+0x20 | Lecture de l'octet de commande en 0x60.
+0x60 | Ecriture d'un octet de commande. Le prochain octet ecrit, en 0x60,
+     | ira dans le registre de commande.
+0xAA | Auto-test qui fournit 0x55 en cas de succes en sortie.
+0xAB | Test qui place le code suivant en sortie :
+     |    00 = ok
+     |    01 = ligne d'horloge bloquee basse
+     |    02 = ligne d'horloge clavier bloquee haute
+     |    03 = ligne donnee clavier bloquee basse
+     |    04 = ligne donnee clavier bloquee haute
+0xAC | Vidage diagnostic. Les 16 octets de la RAM du controleur sont
+     | expedies vers le processeur.
+0xAD | Inhibition du clavier.
+0xAE | Reactive le clavier.
+0xC0 | Lecture d'un octet sur le port d'entree puis placage de celui-ci
+     | dans le buffer de sortie.
+0xD0 | Lecture d'un octet sur le port de sortie puis placage de celui-ci
+     | dans le buffer de sortie. 
+0xD1 | L'octet suivant ecrit en 0x60 ira dans le port de sortie. Si 
+     | bit 0 = 0, une commande de reinitialisation du systeme est emise.
+0xE0 | Lecture de tests d'entrees.
+0xF0 | Mise a 0 des bits 0 et 3 du port de sortie.
+-0xFF|
+
+Les commandes 0x20 et 0x60 permettent de lire et d'ecrire dans le 6845.
+
+Port d'entree :
+    +--+--+--+--+--+--+--+--+
+    |d |c |b |a |  reserve  |
+    +--+--+--+--+--+--+--+--+
+d = clavier inhibe (0) ou actif (1).
+c = monochrome (1) ou couleur (0).
+b = reserve au fabricant.
+a = RAM systeme 512 k (0) ou 256 k (1).
+
+Port de sortie :
+    +--+--+--+--+--+--+--+--+
+    |f |e |d |c | xxx |b |a |
+    +--+--+--+--+--+--+--+--+
+f = sortie donnee clavier
+e = sortie horloge clavier
+d = buffer entree vide
+c = buffer sortie plein
+xxx = reserve
+b = signal porte 0xA20
+a = reset (0) ou non (1).
+
+Les octets ecrits en 0x60 sont envoyees au clavier :
+0xED | Envoie des bits pour les LED. le prochain octet ecrit en 0x60
+     | intervient sur les LED :
+     | bits 3-7 = 0
+     | bit 2 = Capslock (on=1, off=0)
+     | bit 1 = numlock (on=1, off=0)
+     | bit 0 = Scroll lock (on=1, off=0)
+0xEE | Commande d'echo utilisee pour les diagnostics.
+0xF0 | Choisit des scans codes alternatifs grace a l'octet suivant
+     | ecrit en 0x60 :
+     | 00 = scan-code courant renvoye
+     | 01 = choisit le scan-code #1
+     | 02 = choisit le scan-code #2
+     | 03 = choisit le scan-code #3
+0xF4 | Active le clavier
+
+Quand on envoie une commande au clavier, celui-ci envoie un
+accuse en 0x60 (cf. Art of Assembly...).
