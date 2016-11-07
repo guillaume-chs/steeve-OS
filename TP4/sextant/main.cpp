@@ -41,8 +41,8 @@ Ecran ecran;
 void endlessfunc(Ecran *ec) {
 	unsigned int* piRet;
 	unsigned int diff=0;
-
 	unsigned char tmp[]="Buffer";
+
 
 	ec->afficherMot((const char*)tmp,BLANC);
 
@@ -246,7 +246,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 //	Clavier clavier;
 //	SuperPong jeux;
 
-	endlessfunc(&ecran);
+	// endlessfunc(&ecran);
 
 	idt_setup();
 	irq_setup();
@@ -267,7 +267,7 @@ extern "C" void Sextant_main(unsigned long magic, unsigned long addr){
 
 	ecran.afficherMot("Fin OverFlow!!!\n");
 
-	while(true);
+	// while(true);
 
 	/* Etude du fichier cpu_context.cpp et cpu_context_switch */
 	/* changement de context 'a la main' */
