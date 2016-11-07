@@ -1,0 +1,21 @@
+15:45:00 **** Incremental Build of configuration Cross-Compil for project TP4 ****
+make all 
+g++ -I. -c sextant/main.cpp -gdwarf-2 -g3 -Wall -fno-builtin -fno-rtti -fno-exceptions -nostdinc  -o build/all-o/main.o
+sextant/main.cpp: In function 'void hello2(char*)':
+sextant/main.cpp:118: warning: unused variable 'temp'
+sextant/main.cpp: In function 'void thr_hello1(char*)':
+sextant/main.cpp:164: warning: unused variable 'temp'
+sextant/main.cpp: In function 'void thr_hello2(char*)':
+sextant/main.cpp:178: warning: unused variable 'temp'
+sextant/main.cpp: In function 'void preemp_thr_hello1(char*)':
+sextant/main.cpp:203: warning: unused variable 'temp'
+sextant/main.cpp: In function 'void preemp_thr_hello2(char*)':
+sextant/main.cpp:216: warning: unused variable 'temp'
+./sextant/interruptions/idt.h: At global scope:
+./sextant/interruptions/idt.h:107: warning: 'idt' defined but not used
+echo 'Votre compilateur CPP_WindowsNT et votre lieur LD_WindowsNT'
+Votre compilateur CPP_WindowsNT et votre lieur LD_WindowsNT
+ld --warn-common -nostdlib  -T ./support/sextant.lds -o build/boot/sextant.elf build/all-o/main.o build/all-o/multiboot.o build/all-o/fonctionsES.o build/all-o/irq_wrappers.o build/all-o/i8259.o build/all-o/idt.o build/all-o/irq.o build/all-o/Ecran.o build/all-o/Clavier.o build/all-o/PortSerie.o build/all-o/timer.o build/all-o/Case.o build/all-o/random.o build/all-o/Balle.o build/all-o/SuperPong.o build/all-o/Grille.o build/all-o/Raquette.o build/all-o/Horloge.o build/all-o/handler_tic.o build/all-o/handler_clavier.o build/all-o/memoire.o build/all-o/cpu_context_switch.o build/all-o/cpu_context.o build/all-o/coop-thread.o build/all-o/coop-sched.o					  		
+15:45:03 **** Incremental Build of configuration Cross-Compil for project TP4 ****
+make all 
+make: Nothing to be done for `all'.

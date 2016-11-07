@@ -39,11 +39,10 @@ Ecran ecran;
 /*** Question 1 */
 
 void endlessfunc(Ecran *ec) {
-	unsigned char tmp[]="Buffer";
-
 	unsigned int* piRet;
 	unsigned int diff=0;
 
+	unsigned char tmp[]="Buffer";
 
 	ec->afficherMot((const char*)tmp,BLANC);
 
@@ -107,9 +106,10 @@ static void hello1 (char *str)
   for ( ; *str != '\n' ; str++)
     {
 	  ecran.afficherCaractere(BLANC,NOIR,*str);
+	  cpu_context_switch(&ctxt_hello1,ctxt_hello2);
 	  /* Surement */
 	  /* qq chose a ajouter */
-}
+    }
 }
 
 
@@ -120,6 +120,7 @@ static void hello2 (char *str)
   for ( ; *str != '\n' ; str++)
     {
 	  ecran.afficherCaractere(BLANC,NOIR,*str);
+	  cpu_context_switch(&ctxt_hello2,ctxt_hello1);
 	  /* Surement */
 	  /* qq chose a ajouter */
     }

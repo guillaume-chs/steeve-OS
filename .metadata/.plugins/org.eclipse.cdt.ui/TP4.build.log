@@ -1,0 +1,6 @@
+15:45:03 **** Incremental Build of configuration Cross-Compil for project TP4 ****
+make all 
+make: Nothing to be done for `all'.
+
+15:45:04 Build Finished (took 211ms)
+
