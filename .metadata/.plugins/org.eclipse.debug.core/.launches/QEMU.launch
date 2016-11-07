@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<launchConfiguration type="org.eclipse.ui.externaltools.ProgramLaunchConfigurationType">
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="C:\sextant\qemu\qemu.exe"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-no-kqemu -L &quot;c:\sextant\qemu&quot; -boot d -net nic,model=ne2k_isa -net user -tftp ./ -cdrom grub.iso -k fr -soundhw pcspk"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc}${project_path}\build\boot"/>
-</launchConfiguration>
